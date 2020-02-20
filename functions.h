@@ -1,8 +1,8 @@
 #pragma once
 
-#include "ptr.h"
-
 #include <cstddef>
+
+#include "ptr.h"
 
 template <typename T>
 T dot(ptr<T> a, ptr<T> b, size_t n) {
