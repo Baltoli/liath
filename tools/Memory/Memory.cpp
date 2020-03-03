@@ -21,12 +21,12 @@ std::ostream &tool_out() {
   }
 }
 
-void trace_read(void *ins_ptr, void *addr) {
-  tool_out() << "R," << addr << '\n';
+void trace_read(void *ins_ptr, void *addr, int32_t size) {
+  tool_out() << "R," << addr << "," << size << '\n';
 }
 
-void trace_write(void *ins_ptr, void *addr) {
-  tool_out() << "W," << addr << '\n';
+void trace_write(void *ins_ptr, void *addr, int32_t size) {
+  tool_out() << "W," << addr << "," << size << '\n';
 }
 
 void on_instruction(INS ins, void *) {
@@ -35,13 +35,13 @@ void on_instruction(INS ins, void *) {
     if (INS_MemoryOperandIsRead(ins, mem_op)) {
       INS_InsertPredicatedCall(ins, IPOINT_BEFORE, (AFUNPTR)trace_read,
                                IARG_INST_PTR, IARG_MEMORYOP_EA, mem_op,
-                               IARG_END);
+                               IARG_MEMORYREAD_SIZE, IARG_END);
     }
 
     if (INS_MemoryOperandIsWritten(ins, mem_op)) {
       INS_InsertPredicatedCall(ins, IPOINT_BEFORE, (AFUNPTR)trace_write,
                                IARG_INST_PTR, IARG_MEMORYOP_EA, mem_op,
-                               IARG_END);
+                               IARG_MEMORYWRITE_SIZE, IARG_END);
     }
   }
 }
