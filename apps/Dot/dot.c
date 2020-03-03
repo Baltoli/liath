@@ -14,6 +14,8 @@ int usage(char *me) {
   return 1;
 }
 
+float rand_float() { return (float)rand() / (float)RAND_MAX; }
+
 int main(int argc, char **argv) {
   if (argc < 2) {
     return usage(argv[0]);
@@ -23,4 +25,15 @@ int main(int argc, char **argv) {
   if (length < 1) {
     return usage(argv[0]);
   }
+
+  float *a = malloc(sizeof(*a) * length);
+  float *b = malloc(sizeof(*b) * length);
+
+  for (int i = 0; i < length; ++i) {
+    a[i] = rand_float();
+    b[i] = rand_float();
+  }
+
+  float ret = dot(a, b, length);
+  printf("%f\n", ret);
 }
