@@ -7,6 +7,7 @@
 
 ALL_TEST_DIRS := 	\
   Demo			\
+  Memory		\
 
 # All directories which contain utilities for the test system should be placed here.
 # Please maintain alphabetical order.
