@@ -5,7 +5,8 @@
 # All directories which contain tests should be placed here.
 # Please maintain alphabetical order.
 
-ALL_TEST_DIRS := Memory
+ALL_TEST_DIRS := 	\
+  Demo			\
 
 # All directories which contain utilities for the test system should be placed here.
 # Please maintain alphabetical order.
