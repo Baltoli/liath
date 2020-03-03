@@ -5,7 +5,7 @@ Vagrant.configure("2") do |config|
 
   config.vm.provision "shell", inline: <<-SHELL
     apt-get update
-    apt-get install -y gcc-8 g++-8
+    apt-get install -y build-essential gcc-8 g++-8
 
     curl -OL #{PIN_URL}
     mkdir pin
