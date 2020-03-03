@@ -1,4 +1,5 @@
 DIRS :=		\
+  Dot		\
   Empty		\
 
 all: build
