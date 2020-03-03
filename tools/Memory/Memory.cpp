@@ -21,7 +21,30 @@ std::ostream &tool_out() {
   }
 }
 
-void on_instruction(INS ins, void *) {}
+void trace_read(void *ins_ptr, void *addr) {
+  tool_out() << "R," << addr << '\n';
+}
+
+void trace_write(void *ins_ptr, void *addr) {
+  tool_out() << "W," << addr << '\n';
+}
+
+void on_instruction(INS ins, void *) {
+  auto operands = INS_MemoryOperandCount(ins);
+  for (auto mem_op = 0u; mem_op < operands; ++mem_op) {
+    if (INS_MemoryOperandIsRead(ins, mem_op)) {
+      INS_InsertPredicatedCall(ins, IPOINT_BEFORE, (AFUNPTR)trace_read,
+                               IARG_INST_PTR, IARG_MEMORYOP_EA, mem_op,
+                               IARG_END);
+    }
+
+    if (INS_MemoryOperandIsWritten(ins, mem_op)) {
+      INS_InsertPredicatedCall(ins, IPOINT_BEFORE, (AFUNPTR)trace_write,
+                               IARG_INST_PTR, IARG_MEMORYOP_EA, mem_op,
+                               IARG_END);
+    }
+  }
+}
 
 void finalize(int32_t code, void *) {
   if (file_out.is_open()) {
