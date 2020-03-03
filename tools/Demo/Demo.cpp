@@ -1,3 +1,10 @@
+/**
+ * Demo code for testing out Pin:
+ *
+ * Sourced from (public domain):
+ * http://deniable.org/reversing/binary-instrumentation
+ */
+
 #include "pin.H"
 
 #include <fstream>
