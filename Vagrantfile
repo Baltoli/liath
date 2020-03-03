@@ -1,12 +1,12 @@
 PIN_URL = "https://software.intel.com/sites/landingpage/pintool/downloads/pin-3.11-97998-g7ecce2dac-gcc-linux.tar.gz"
 
 Vagrant.configure("2") do |config|
-  config.vm.box = "ubuntu/bionic64"
+  config.vm.box = "debian/buster64"
 
   config.vm.provision "shell", inline: <<-SHELL
     # Install necessary packages
     apt-get update
-    apt-get install -y build-essential gcc-8 g++-8
+    apt-get install -y curl build-essential
 
     # Get the Pin binary distribution from Intel
     if [ ! -d "pin" ]; then
