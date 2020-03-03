@@ -11,5 +11,7 @@ Vagrant.configure("2") do |config|
     mkdir pin
     tar xvf *.tar.gz -C pin --strip-components 1
     rm *.tar.gz
+
+    chown -R vagrant:vagrant .
   SHELL
 end
