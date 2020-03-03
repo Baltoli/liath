@@ -7,11 +7,13 @@ Vagrant.configure("2") do |config|
     apt-get update
     apt-get install -y build-essential gcc-8 g++-8
 
-    curl -OL #{PIN_URL}
-    mkdir pin
-    tar xvf *.tar.gz -C pin --strip-components 1
-    rm *.tar.gz
-
-    chown -R vagrant:vagrant .
+    if [ ! -d "pin" ]; then
+      echo "Downloading and unpacking pin..."
+      curl -OL #{PIN_URL}
+      mkdir pin
+      tar xvf *.tar.gz -C pin --strip-components 1
+      rm *.tar.gz
+      chown -R vagrant:vagrant pin
+    fi
   SHELL
 end
