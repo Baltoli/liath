@@ -1,7 +1,7 @@
 PIN_URL = "https://software.intel.com/sites/landingpage/pintool/downloads/pin-3.11-97998-g7ecce2dac-gcc-linux.tar.gz"
 
 Vagrant.configure("2") do |config|
-  config.vm.box = "debian/buster64"
+  config.vm.box = "ubuntu/bionic64"
 
   config.vm.provision "shell", inline: <<-SHELL
     # Install necessary packages
