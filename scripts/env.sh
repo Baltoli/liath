@@ -1,2 +1,2 @@
 export PIN_ROOT=$HOME/pin
-export PATH=$PIN_ROOT:$PATH
+export PATH=$PATH:$PIN_ROOT
