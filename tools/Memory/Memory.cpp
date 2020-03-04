@@ -33,7 +33,7 @@ void trace_write(void *ins_ptr, void *addr, int32_t size) {
   tool_out() << "W," << addr << "," << size << '\n';
 }
 
-void on_instruction(INS ins, void *) {
+void instrument_instruction(INS ins) {
   auto operands = INS_MemoryOperandCount(ins);
   for (auto mem_op = 0u; mem_op < operands; ++mem_op) {
     if (INS_MemoryOperandIsRead(ins, mem_op)) {
@@ -50,14 +50,30 @@ void on_instruction(INS ins, void *) {
   }
 }
 
+void on_instruction(INS ins, void *) { instrument_instruction(ins); }
+
 void instrument_symbol(IMG img, void *sym) {
   auto symbol_name = static_cast<char *>(sym);
 
-  for (auto sym = IMG_RegsymHead(img); SYM_Valid(sym); sym = SYM_Next(sym)) {
-    auto mangled = SYM_Name(sym);
-    auto name = PIN_UndecorateSymbolName(mangled, UNDECORATION_NAME_ONLY);
+  for (auto sec = IMG_SecHead(img); SEC_Valid(sec); sec = SEC_Next(sec)) {
+    for (auto rtn = SEC_RtnHead(sec); RTN_Valid(rtn); rtn = RTN_Next(rtn)) {
+      auto sym = RTN_Sym(rtn);
 
-    if (name == symbol_name) {
+      if (SYM_Valid(sym)) {
+        auto mangled = SYM_Name(sym);
+        auto name = PIN_UndecorateSymbolName(mangled, UNDECORATION_NAME_ONLY);
+
+        if (name == symbol_name) {
+          RTN_Open(rtn);
+
+          for (auto ins = RTN_InsHead(rtn); INS_Valid(ins);
+               ins = INS_Next(ins)) {
+            instrument_instruction(ins);
+          }
+
+          RTN_Close(rtn);
+        }
+      }
     }
   }
 }
