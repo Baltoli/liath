@@ -1,11 +1,15 @@
-#include "pin.H"
-
 #include <fstream>
 #include <iostream>
 #include <string>
 
+#include "pin.H"
+
 KNOB<std::string> OutputFile(KNOB_MODE_WRITEONCE, "pintool", "o", "-",
                              "Specify memory trace output file");
+
+KNOB<std::string> SymbolName(
+    KNOB_MODE_WRITEONCE, "pintool", "s", "-",
+    "Specify symbol to trace (whole app if not specified)");
 
 std::ofstream file_out;
 
@@ -46,6 +50,18 @@ void on_instruction(INS ins, void *) {
   }
 }
 
+void instrument_symbol(IMG img, void *sym) {
+  auto symbol_name = static_cast<char *>(sym);
+
+  for (auto sym = IMG_RegsymHead(img); SYM_Valid(sym); sym = SYM_Next(sym)) {
+    auto mangled = SYM_Name(sym);
+    auto name = PIN_UndecorateSymbolName(mangled, UNDECORATION_NAME_ONLY);
+
+    if (name == symbol_name) {
+    }
+  }
+}
+
 void finalize(int32_t code, void *) {
   if (file_out.is_open()) {
     file_out.close();
@@ -57,7 +73,15 @@ int main(int argc, char **argv) {
     return 1;
   }
 
-  INS_AddInstrumentFunction(on_instruction, nullptr);
+  PIN_InitSymbols();
+
+  if (SymbolName.Value() == "-") {
+    INS_AddInstrumentFunction(on_instruction, nullptr);
+  } else {
+    IMG_AddInstrumentFunction(instrument_symbol,
+                              (void *)SymbolName.Value().c_str());
+  }
+
   PIN_AddFiniFunction(finalize, nullptr);
 
   PIN_StartProgram();
