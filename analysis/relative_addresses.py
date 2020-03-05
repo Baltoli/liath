@@ -18,7 +18,7 @@ def main(in_f):
     df = pd.read_csv(in_f, converters = { 'addr' : from_hex })
     stack_top = max(df.addr)
     heap_bottom = min(df.addr)
-    df['a'] = df['addr'].apply(relative_addr, args=(stack_top, heap_bottom))
+    df['section'], df['offset'] = df.addr.apply(relative_addr, args=(stack_top, heap_bottom)).str
     print(df)
 
 if __name__ == "__main__":
