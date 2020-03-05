@@ -6,7 +6,7 @@ Vagrant.configure("2") do |config|
   config.vm.provision "shell", inline: <<-SHELL
     # Install necessary packages
     apt-get update
-    apt-get install -y curl build-essential
+    apt-get install -y curl build-essential python3-pip
 
     # Get the Pin binary distribution from Intel
     if [ ! -d "pin" ]; then
