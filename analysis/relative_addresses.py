@@ -19,7 +19,7 @@ def main(in_f):
     stack_top = max(df.addr)
     heap_bottom = min(df.addr)
     df['section'], df['offset'] = df.addr.apply(relative_addr, args=(stack_top, heap_bottom)).str
-    print(df)
+    print(df.to_csv(index=False))
 
 if __name__ == "__main__":
     if len(sys.argv) < 2:
