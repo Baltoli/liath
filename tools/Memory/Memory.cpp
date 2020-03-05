@@ -129,5 +129,6 @@ int main(int argc, char **argv) {
 
   PIN_AddFiniFunction(finalize, nullptr);
 
+  tool_out() << "mode,addr,size\n";
   PIN_StartProgram();
 }
