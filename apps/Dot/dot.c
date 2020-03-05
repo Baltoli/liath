@@ -22,7 +22,7 @@ int main(int argc, char **argv) {
   }
 
   int length = atoi(argv[1]);
-  if (length < 1) {
+  if (length < 0) {
     return usage(argv[0]);
   }
 

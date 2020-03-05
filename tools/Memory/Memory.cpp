@@ -11,6 +11,9 @@ KNOB<std::string> SymbolName(
     KNOB_MODE_WRITEONCE, "pintool", "s", "-",
     "Specify symbol to trace (whole app if not specified)");
 
+KNOB<bool> TraceReadValues(KNOB_MODE_WRITEONCE, "pintool", "v", "0",
+                           "Trace the concrete values read from memory");
+
 std::ofstream file_out;
 
 std::ostream &tool_out() {
@@ -27,11 +30,37 @@ std::ostream &tool_out() {
 
 void trace_read(void *ins_ptr, void *addr, int32_t size) {
   tool_out() << "R," << addr << "," << size << '\n';
+
+  if (TraceReadValues.Value()) {
+    if (size == 4) {
+      int32_t i_val;
+      float f_val;
+
+      PIN_SafeCopy(&i_val, addr, size);
+      PIN_SafeCopy(&f_val, addr, size);
+
+      tool_out() << "[\n  int=" << std::dec << i_val << "\n  float=" << f_val
+                 << "\n  ptr=0x" << std::hex << i_val << "\n]\n\n";
+    } else if (size == 8) {
+      int64_t i_val;
+      double f_val;
+
+      PIN_SafeCopy(&i_val, addr, size);
+      PIN_SafeCopy(&f_val, addr, size);
+
+      tool_out() << "[\n  int=" << std::dec << i_val << "\n  float=" << f_val
+                 << "\n  ptr=0x" << std::hex << i_val << "\n]\n\n";
+    } else {
+      tool_out() << "  [unknown value]\n";
+    }
+  }
 }
 
 void trace_write(void *ins_ptr, void *addr, int32_t size) {
   tool_out() << "W," << addr << "," << size << '\n';
 }
+
+void after_memop(void *ins_ptr) { tool_out() << "  next: " << ins_ptr << '\n'; }
 
 void instrument_instruction(INS ins) {
   auto operands = INS_MemoryOperandCount(ins);
