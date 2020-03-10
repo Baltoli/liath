@@ -1,4 +1,5 @@
 DIRS :=		\
+  Cholesky	\
   Dot		\
   Empty		\
 
