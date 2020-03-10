@@ -1,7 +1,7 @@
 all: chol
 
 chol: chol.c
-	$(CC) $^ -o $@
+	$(CC) $^ -o $@ -lm
 
 clean:
 	rm -f chol

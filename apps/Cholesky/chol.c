@@ -1,3 +1,4 @@
+#include <math.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -14,9 +15,11 @@ struct matrix {
   int n;
 };
 
-float *at(struct matrix mat, int row, int col) {
+float *pat(struct matrix mat, int row, int col) {
   return &mat.data[row * mat.n + col];
 }
+
+float at(struct matrix mat, int row, int col) { return *pat(mat, row, col); }
 
 struct matrix alloc_matrix(int n) {
   struct matrix mat;
@@ -37,20 +40,45 @@ struct matrix random_matrix(int n) {
   struct matrix mat = alloc_matrix(n);
 
   for (int row = 0; row < mat.n; ++row) {
-    for (int col = 0; col < mat.n; ++col) {
+    for (int col = row; col < mat.n; ++col) {
       float val = rand_float();
-      *at(mat, row, col) = val;
-      *at(mat, col, row) = val;
+      *pat(mat, row, col) = val;
+      *pat(mat, col, row) = val;
     }
+  }
+
+  for (int i = 0; i < mat.n; ++i) {
+    *pat(mat, i, i) += mat.n;
   }
 
   return mat;
 }
 
+struct matrix decomp(struct matrix mat) {
+  struct matrix lower = zero_matrix(mat.n);
+
+  for (int i = 0; i < mat.n; ++i) {
+    for (int j = 0; j < (i + 1); ++j) {
+      float sum = 0.0f;
+      for (int k = 0; k < j; ++k) {
+        sum += at(lower, i, k) * at(lower, j, k);
+      }
+
+      if (i == j) {
+        *pat(lower, i, j) = sqrt(at(mat, i, i) - sum);
+      } else {
+        *pat(lower, i, j) = 1.0f / at(lower, j, j) * (at(mat, i, j) - sum);
+      }
+    }
+  }
+
+  return lower;
+}
+
 void show(struct matrix mat) {
   for (int row = 0; row < mat.n; ++row) {
     for (int col = 0; col < mat.n; ++col) {
-      printf("%.3f ", *at(mat, row, col));
+      printf("%.3f ", at(mat, row, col));
     }
     printf("\n");
   }
@@ -72,5 +100,11 @@ int main(int argc, char **argv) {
 
   show(mat);
 
+  struct matrix low = decomp(mat);
+
+  printf("\n");
+  show(low);
+
   free_matrix(mat);
+  free_matrix(low);
 }
