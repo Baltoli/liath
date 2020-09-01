@@ -28,8 +28,9 @@ std::ostream &tool_out() {
   }
 }
 
-void trace_read(void *ins_ptr, void *addr, int32_t size) {
-  tool_out() << "R," << addr << "," << size << '\n';
+void trace_read(void *ins_ptr, void *addr, int32_t size, INS ins) {
+  tool_out() << "R," << size << "," << (uintptr_t)addr << ","
+             << (uintptr_t)ins_ptr << '\n';
 
   if (TraceReadValues.Value()) {
     if (size == 4) {
@@ -56,8 +57,9 @@ void trace_read(void *ins_ptr, void *addr, int32_t size) {
   }
 }
 
-void trace_write(void *ins_ptr, void *addr, int32_t size) {
-  tool_out() << "W," << addr << "," << size << '\n';
+void trace_write(void *ins_ptr, void *addr, int32_t size, INS ins) {
+  tool_out() << "W," << size << "," << (uintptr_t)addr << ","
+             << (uintptr_t)ins_ptr << '\n';
 }
 
 void after_memop(void *ins_ptr) { tool_out() << "  next: " << ins_ptr << '\n'; }
@@ -68,13 +70,13 @@ void instrument_instruction(INS ins) {
     if (INS_MemoryOperandIsRead(ins, mem_op)) {
       INS_InsertPredicatedCall(ins, IPOINT_BEFORE, (AFUNPTR)trace_read,
                                IARG_INST_PTR, IARG_MEMORYOP_EA, mem_op,
-                               IARG_MEMORYREAD_SIZE, IARG_END);
+                               IARG_MEMORYREAD_SIZE, IARG_PTR, ins, IARG_END);
     }
 
     if (INS_MemoryOperandIsWritten(ins, mem_op)) {
       INS_InsertPredicatedCall(ins, IPOINT_BEFORE, (AFUNPTR)trace_write,
                                IARG_INST_PTR, IARG_MEMORYOP_EA, mem_op,
-                               IARG_MEMORYWRITE_SIZE, IARG_END);
+                               IARG_MEMORYWRITE_SIZE, IARG_PTR, ins, IARG_END);
     }
   }
 }
