@@ -3,23 +3,45 @@
 import pandas as pd
 import sys
 
-def from_hex(s):
-    return int(s, 16)
+def closest(spaces):
+    def closest_impl(val):
+        min_diff = None
+        min_space = None
 
-# Use the heuristic check that we won't use 40 TB of memory, so the address is
-# on the stack if it's closer to the top than the bottom and vice-versa.
-def relative_addr(addr, stack, heap):
-    if abs(stack - addr) < abs(heap - addr):
-        return ('stack', stack - addr)
-    else:
-        return ('heap', addr - heap)
+        for name in ['stack', 'heap']:
+            base = spaces[name]
+            diff = abs(val - base)
+            if min_diff is None or diff < min_diff:
+                min_diff = diff
+                min_space = name
+
+        return min_space
+    return closest_impl
+
+def relative(spaces):
+    def relative_impl(row):
+        return [
+            spaces['stack'] - row.addr if row.space == "stack" else row.addr - spaces['heap'],
+            spaces['program'] - row.pc
+        ]
+    return relative_impl
 
 def main(in_f):
-    df = pd.read_csv(in_f, converters = { 'addr' : from_hex })
-    stack_top = max(df.addr)
-    heap_bottom = min(df.addr)
-    df['section'], df['offset'] = df.addr.apply(relative_addr, args=(stack_top, heap_bottom)).str
-    print(df.to_csv(index=False))
+    df = pd.read_csv(in_f)
+
+    max_addr = df["addr"].max()
+    min_addr = df["addr"].min()
+    max_pc = df["pc"].max()
+
+    spaces = {
+        'heap': min_addr,
+        'stack': max_addr,
+        'program': max_pc
+    }
+
+    df["space"] = df["addr"].apply(closest(spaces))
+    df[["addr", "pc"]] = df[["addr", "space", "pc"]].apply(relative(spaces), axis=1, result_type='expand')
+    print(df.to_csv())
 
 if __name__ == "__main__":
     if len(sys.argv) < 2:
